@@ -52,7 +52,7 @@ struct SheetTextFieldView: View {
     
     var body: some View {
         VStack {
-            Group {
+            
                 Text("Settings Panel")
                     .font(.headline)
                 
@@ -66,13 +66,20 @@ struct SheetTextFieldView: View {
                 Toggle(isOn: self.$longer) {
                     Text("Advanced")
                 }
-                
+            
+                Button("Close Button") {
+                    self.partialSheetManager.closePartialSheet()
+                }.background(Color.red)
+            
                 Button("Close Button") {
                     self.partialSheetManager.closePartialSheet()
                 }
-            }
-            .padding()
-            .frame(height: 50)
+            
+                Button("Close Button") {
+                    self.partialSheetManager.closePartialSheet()
+                }
+            
+            
             if self.longer {
                 VStack {
                     Text("More settings here...")
@@ -80,6 +87,7 @@ struct SheetTextFieldView: View {
                 .frame(height: 200)
             }
         }
+        .padding()
     }
 }
 

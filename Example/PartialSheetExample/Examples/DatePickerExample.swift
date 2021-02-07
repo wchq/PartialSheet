@@ -45,15 +45,28 @@ struct DatePickerExample_Previews: PreviewProvider {
 
 struct DatePickerSheetView: View {
     @State private var date: Date = Date()
+    @EnvironmentObject var partialSheetManager : PartialSheetManager
     
     var body: some View {
         VStack {
             VStack {
-                Text("Settings Panel").font(.headline)
-                DatePicker("Date", selection: $date)
+                Text("Enter your birthday")
+                    .font(.title)
+                if #available(iOS 14.0, *) {
+                    DatePicker("Enter your birthday", selection: $date)
+                        .datePickerStyle(GraphicalDatePickerStyle())
+                        .frame(maxHeight: 400)
+                } else {
+                    DatePicker("Enter your birthday", selection: $date)
+                        .frame(maxHeight: 400)
+                }
+                
+        
+                Button("Close") {
+                    partialSheetManager.closePartialSheet()
+                }
             }
             .padding()
-            .frame(height: 270)
         }
     }
 }

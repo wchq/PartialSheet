@@ -13,14 +13,14 @@ import Combine
 struct PartialSheet: ViewModifier {
     
     // MARK: - Public Properties
-
+    
     /// The Partial Sheet Style configuration
     var style: PartialSheetStyle
     
     // MARK: - Private Properties
-
+    
     @EnvironmentObject private var manager: PartialSheetManager
-
+    
     /// The rect containing the presenter
     @State private var presenterContentRect: CGRect = .zero
     
@@ -36,8 +36,8 @@ struct PartialSheet: ViewModifier {
     /// The point for the top anchor
     private var topAnchor: CGFloat {
         return max(presenterContentRect.height +
-            (UIApplication.shared.windows.first?.safeAreaInsets.bottom ?? 0) -
-            sheetContentRect.height - handlerSectionHeight,
+                    (UIApplication.shared.windows.first?.safeAreaInsets.bottom ?? 0) -
+                    sheetContentRect.height - handlerSectionHeight,
                    style.minTopDistance)
     }
     
@@ -50,13 +50,15 @@ struct PartialSheet: ViewModifier {
     private var currentAnchorPoint: CGFloat {
         return manager.isPresented ?
             topAnchor :
-        bottomAnchor
+            bottomAnchor
     }
     
     /// The height of the handler bar section
     private var handlerSectionHeight: CGFloat {
         return 30
     }
+    
+    @GestureState private var captured = false
     
     /// Calculates the sheets y position
     private var sheetPosition: CGFloat {
@@ -72,7 +74,7 @@ struct PartialSheet: ViewModifier {
             return self.bottomAnchor - self.dragOffset
         }
     }
-
+    
     /// Background of sheet
     private var background: AnyView {
         switch self.style.background {
@@ -99,7 +101,7 @@ struct PartialSheet: ViewModifier {
                                     value: [PreferenceData(bounds: proxy.frame(in: .global))]
                                 )
                             }
-                    )
+                        )
                         .onAppear{
                             let notifier = NotificationCenter.default
                             let willShow = UIResponder.keyboardWillShowNotification
@@ -112,15 +114,15 @@ struct PartialSheet: ViewModifier {
                                                  object: nil,
                                                  queue: .main,
                                                  using: self.keyboardHide)
-                    }
-                    .onDisappear {
-                        let notifier = NotificationCenter.default
-                        notifier.removeObserver(self)
-                    }
-                    .onPreferenceChange(PresenterPreferenceKey.self, perform: { (prefData) in
-                        self.presenterContentRect = prefData.first?.bounds ?? .zero
-                    })
-            }
+                        }
+                        .onDisappear {
+                            let notifier = NotificationCenter.default
+                            notifier.removeObserver(self)
+                        }
+                        .onPreferenceChange(PresenterPreferenceKey.self, perform: { (prefData) in
+                            self.presenterContentRect = prefData.first?.bounds ?? .zero
+                        })
+                }
                 // if the device type is not an iPhone,
                 // display the sheet content as a normal sheet
                 .iPadOrMac {
@@ -130,22 +132,22 @@ struct PartialSheet: ViewModifier {
                         }, content: {
                             self.iPadAndMacSheet()
                         })
-            }
+                }
             // if the device type is an iPhone,
             // display the sheet content as a draggableSheet
             if deviceType == .iphone {
                 iPhoneSheet()
                     .edgesIgnoringSafeArea(.vertical)
             }
-        }
+        }.zIndex(999)
     }
 }
 
 //MARK: - Platfomr Specific Sheet Builders
 extension PartialSheet {
-
+    
     //MARK: - Mac and iPad Sheet Builder
-
+    
     /// This is the builder for the sheet content for iPad and Mac devices only
     private func iPadAndMacSheet() -> some View {
         VStack {
@@ -166,16 +168,16 @@ extension PartialSheet {
     }
 
     //MARK: - iPhone Sheet Builder
-
+    
     /// This is the builder for the sheet content for iPhone devices only
     private func iPhoneSheet()-> some View {
         // Build the drag gesture
         let drag = dragGesture()
         
         return ZStack {
-
+            
             //MARK: - iPhone Cover View
-
+            
             if manager.isPresented {
                 Group {
                     if style.enableCover {
@@ -195,48 +197,54 @@ extension PartialSheet {
                     }
                 }
             }
+
+            
             // The SHEET VIEW
             Group {
                 VStack(spacing: 0) {
-                    // This is the little rounded bar (HANDLER) on top of the sheet
-                    VStack {
+                    DraggableView {
+
+                        // This is the little rounded bar (HANDLER) on top of the sheet
+                        VStack {
+                            Spacer()
+                            RoundedRectangle(cornerRadius: CGFloat(5.0) / 2.0)
+                                .frame(width: 40, height: 5)
+                                .foregroundColor(self.style.handlerBarColor)
+                            Spacer()
+                        }
+                        .frame(height: handlerSectionHeight)
+                        VStack {
+                            // Attach the SHEET CONTENT
+                            self.manager.content
+                                .background(
+                                    GeometryReader { proxy in
+                                        Color.clear.preference(key: SheetPreferenceKey.self, value: [PreferenceData(bounds: proxy.frame(in: .global))])
+                                    }
+                                )
+                            }
                         Spacer()
-                        RoundedRectangle(cornerRadius: CGFloat(5.0) / 2.0)
-                            .frame(width: 40, height: 5)
-                            .foregroundColor(self.style.handlerBarColor)
-                        Spacer()
+                    }.gesture(drag)
                     }
-                    .frame(height: handlerSectionHeight)
-                    VStack {
-                        // Attach the SHEET CONTENT
-                        self.manager.content
-                            .background(
-                                GeometryReader { proxy in
-                                    Color.clear.preference(key: SheetPreferenceKey.self, value: [PreferenceData(bounds: proxy.frame(in: .global))])
-                                }
-                        )
-                    }
-                    Spacer()
+                    .onPreferenceChange(SheetPreferenceKey.self, perform: { (prefData) in
+                        withAnimation(.interpolatingSpring(stiffness: 300.0, damping: 30.0, initialVelocity: 10.0)) {
+                            self.sheetContentRect = prefData.first?.bounds ?? .zero
+                        }
+                    })
+                    .frame(width: UIScreen.main.bounds.width)
+                    .background(self.background)
+                    .cornerRadius(style.cornerRadius)
+                    .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.13), radius: 10.0)
+                    .offset(y: self.sheetPosition)
+                    //.simultaneousGesture(drag)
                 }
-                .onPreferenceChange(SheetPreferenceKey.self, perform: { (prefData) in
-                    withAnimation(.interpolatingSpring(stiffness: 300.0, damping: 30.0, initialVelocity: 10.0)) {
-                        self.sheetContentRect = prefData.first?.bounds ?? .zero
-                    }
-                })
-                .frame(width: UIScreen.main.bounds.width)
-                .background(self.background)
-                .cornerRadius(style.cornerRadius)
-                .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.13), radius: 10.0)
-                .offset(y: self.sheetPosition)
-                .gesture(drag)
             }
-        }
+        
     }
 }
 
 // MARK: - Drag Gesture & Handler
 extension PartialSheet {
-
+    
     /// Create a new **DragGesture** with *updating* and *onEndend* func
     private func dragGesture() -> _EndedGesture<_ChangedGesture<DragGesture>> {
         DragGesture(minimumDistance: 0, coordinateSpace: .local)
@@ -307,7 +315,7 @@ extension PartialSheet {
 
 // MARK: - Keyboard Handlers Methods
 extension PartialSheet {
-
+    
     /// Add the keyboard offset
     private func keyboardShow(notification: Notification) {
         let endFrame = UIResponder.keyboardFrameEndUserInfoKey
@@ -319,7 +327,7 @@ extension PartialSheet {
             }
         }
     }
-
+    
     /// Remove the keyboard offset
     private func keyboardHide(notification: Notification) {
         DispatchQueue.main.async {
@@ -340,7 +348,7 @@ extension PartialSheet {
 
 // MARK: - PreferenceKeys Handlers
 extension PartialSheet {
-
+    
     /// Preference Key for the Sheet Presener
     struct PresenterPreferenceKey: PreferenceKey {
         static func reduce(value: inout [PartialSheet.PreferenceData], nextValue: () -> [PartialSheet.PreferenceData]) {
@@ -348,7 +356,7 @@ extension PartialSheet {
         }
         static var defaultValue: [PreferenceData] = []
     }
-
+    
     /// Preference Key for the Sheet Content
     struct SheetPreferenceKey: PreferenceKey {
         static func reduce(value: inout [PartialSheet.PreferenceData], nextValue: () -> [PartialSheet.PreferenceData]) {
@@ -356,12 +364,12 @@ extension PartialSheet {
         }
         static var defaultValue: [PreferenceData] = []
     }
-
+    
     /// Data Stored in the Preferences
     struct PreferenceData: Equatable {
         let bounds: CGRect
     }
-
+    
 }
 
 struct PartialSheetAddView<Base: View, InnerContent: View>: View {
@@ -372,7 +380,7 @@ struct PartialSheetAddView<Base: View, InnerContent: View>: View {
     let base: Base
     
     @State var model = Model()
-
+    
     var body: some View {
         if model.update(value: isPresented) {
             DispatchQueue.main.async(execute: updateContent)
