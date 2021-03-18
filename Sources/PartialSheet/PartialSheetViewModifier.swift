@@ -203,14 +203,15 @@ extension PartialSheet {
             Group {
                 VStack(spacing: 0) {
                     // This is the little rounded bar (HANDLER) on top of the sheet
-                    VStack {
-                        Spacer()
-                        RoundedRectangle(cornerRadius: CGFloat(5.0) / 2.0)
-                            .frame(width: 40, height: 5)
-                            .foregroundColor(self.style.handlerBarColor)
-                        Spacer()
-                    }
-                    .frame(height: handlerSectionHeight)
+//                    VStack {
+//                        Spacer()
+//                        RoundedRectangle(cornerRadius: CGFloat(5.0) / 2.0)
+//                            .frame(width: 40, height: 5)
+//                            .foregroundColor(self.style.handlerBarColor)
+//                        Spacer()
+//                    }
+//                    .frame(height: handlerSectionHeight)
+                    
                     VStack {
                         // Attach the SHEET CONTENT
                         self.manager.content
