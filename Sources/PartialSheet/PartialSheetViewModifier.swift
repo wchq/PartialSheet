@@ -220,7 +220,7 @@ extension PartialSheet {
                 })
                 .frame(width: UIScreen.main.bounds.width)
                 .background(self.background)
-                .cornerRadius(style.cornerRadius)
+                .clipShape(RoundedRectangle(cornerRadius: style.cornerRadius, style: .continuous))
                 .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.13), radius: 10.0)
                 .offset(y: self.sheetPosition)
                 .gesture(drag)
