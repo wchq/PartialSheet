@@ -222,7 +222,7 @@ extension PartialSheet {
                 .background(self.background)
                 .clipShape(RoundedRectangle(cornerRadius: style.cornerRadius, style: .continuous))
                 .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.13), radius: 10.0)
-                .offset(y: self.sheetPosition + 30)
+                .offset(y: self.sheetPosition + handlerSectionHeight)
                 .gesture(drag)
             }
         }
