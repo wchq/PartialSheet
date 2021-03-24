@@ -225,7 +225,6 @@ extension PartialSheet {
                 .offset(y: self.sheetPosition)
                 .gesture(drag)
             }
-            .background(Color.red)
         }
     }
 }
