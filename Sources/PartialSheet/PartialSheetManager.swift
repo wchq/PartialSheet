@@ -80,7 +80,7 @@ public class PartialSheetManager: ObservableObject {
 
     /// Close the Partial Sheet and run the onDismiss function if it has been previously specified
     public func closePartialSheet() {
-        withAnimation(.spring(response: 0.5, dampingFraction: 0.825)) {
+        withAnimation(.linear(duration: 0.3)) {
             self.isPresented = false
         }
         self.onDismiss?()
