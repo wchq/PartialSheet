@@ -214,8 +214,10 @@ extension PartialSheet {
                     Spacer()
                 }
                 .onPreferenceChange(SheetPreferenceKey.self, perform: { (prefData) in
-                    withAnimation(manager.defaultAnimation) {
-                        self.sheetContentRect = prefData.first?.bounds ?? .zero
+                    DispatchQueue.main.async {
+                        withAnimation(manager.defaultAnimation) {
+                            self.sheetContentRect = prefData.first?.bounds ?? .zero
+                        }
                     }
                 })
                 .frame(width: UIScreen.main.bounds.width)
@@ -223,6 +225,7 @@ extension PartialSheet {
                 .clipShape(RoundedRectangle(cornerRadius: style.cornerRadius, style: .continuous))
                 .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.13), radius: 10.0)
                 .offset(y: self.sheetPosition + handlerSectionHeight)
+                .animation(manager.defaultAnimation)
                 .gesture(drag)
             }
         }

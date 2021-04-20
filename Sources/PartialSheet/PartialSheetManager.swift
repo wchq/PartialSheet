@@ -69,7 +69,7 @@ public class PartialSheetManager: ObservableObject {
         self.content = AnyView(content())
         self.onDismiss = onDismiss
         DispatchQueue.main.async {
-            withAnimation(.spring(response: 0.5, dampingFraction: 0.825)) {
+            withAnimation(self.defaultAnimation) {
                 self.isPresented = true
             }
         }
