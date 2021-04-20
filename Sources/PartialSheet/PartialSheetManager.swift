@@ -38,6 +38,9 @@ public class PartialSheetManager: ObservableObject {
     @Published private(set) var content: AnyView
     /// the onDismiss code runned when the partial sheet is closed
     private(set) var onDismiss: (() -> Void)?
+    
+    /// Possibility to customize the slide in/out animation of the partial sheet
+    public var defaultAnimation: Animation = Animation.spring(response: 0.4, dampingFraction: 0.7, blendDuration: 1.0)
 
     public init() {
         self.content = AnyView(EmptyView())
@@ -49,6 +52,20 @@ public class PartialSheetManager: ObservableObject {
      - parameter onDismiss: This code will be runned when the sheet is dismissed.
      */
     public func showPartialSheet<T>(_ onDismiss: (() -> Void)? = nil, @ViewBuilder content: @escaping () -> T) where T: View {
+        guard !isPresented else {
+            withAnimation(defaultAnimation) {
+                updatePartialSheet(
+                    content: {
+                        // do not animate the content, just the partial sheet
+                        withAnimation(nil) {
+                            content()
+                        }
+                    },
+                    onDismiss: onDismiss)
+            }
+            return
+        }
+        
         self.content = AnyView(content())
         self.onDismiss = onDismiss
         DispatchQueue.main.async {
@@ -72,7 +89,7 @@ public class PartialSheetManager: ObservableObject {
             self.onDismiss = onDismiss
         }
         if let isPresented = isPresented {
-            withAnimation(.spring(response: 0.5, dampingFraction: 0.825)) {
+            withAnimation(defaultAnimation) {
                 self.isPresented = isPresented
             }
         }
@@ -80,7 +97,7 @@ public class PartialSheetManager: ObservableObject {
 
     /// Close the Partial Sheet and run the onDismiss function if it has been previously specified
     public func closePartialSheet() {
-        withAnimation(.linear(duration: 0.3)) {
+        withAnimation(.linear(duration: 0.25)) {
             self.isPresented = false
         }
         self.onDismiss?()

@@ -192,7 +192,7 @@ extension PartialSheet {
                 }
                 .edgesIgnoringSafeArea(.vertical)
                 .onTapGesture {
-                    withAnimation(.interpolatingSpring(stiffness: 300.0, damping: 30.0, initialVelocity: 10.0)) {
+                    withAnimation(manager.defaultAnimation) {
                         self.manager.isPresented = false
                         self.dismissKeyboard()
                         self.manager.onDismiss?()
@@ -214,7 +214,7 @@ extension PartialSheet {
                     Spacer()
                 }
                 .onPreferenceChange(SheetPreferenceKey.self, perform: { (prefData) in
-                    withAnimation(.interpolatingSpring(stiffness: 300.0, damping: 30.0, initialVelocity: 10.0)) {
+                    withAnimation(manager.defaultAnimation) {
                         self.sheetContentRect = prefData.first?.bounds ?? .zero
                     }
                 })
@@ -223,7 +223,6 @@ extension PartialSheet {
                 .clipShape(RoundedRectangle(cornerRadius: style.cornerRadius, style: .continuous))
                 .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.13), radius: 10.0)
                 .offset(y: self.sheetPosition + handlerSectionHeight)
-                .animation(Animation.spring(response: 0.6, dampingFraction: 0.8, blendDuration: 1.0).delay(0.1))
                 .gesture(drag)
             }
         }
@@ -266,14 +265,14 @@ extension PartialSheet {
         // Set the correct anchor point based on the vertical direction of the drag
         if verticalDirection > 1 {
             DispatchQueue.main.async {
-                withAnimation(.interpolatingSpring(stiffness: 300.0, damping: 30.0, initialVelocity: 10.0)) {
+                withAnimation(manager.defaultAnimation) {
                     dragOffset = 0
                     self.manager.isPresented = false
                     self.manager.onDismiss?()
                 }
             }
         } else if verticalDirection < 0 {
-            withAnimation(.interpolatingSpring(stiffness: 300.0, damping: 30.0, initialVelocity: 10.0)) {
+            withAnimation(manager.defaultAnimation) {
                 dragOffset = 0
                 self.manager.isPresented = true
             }
@@ -290,7 +289,7 @@ extension PartialSheet {
                 closestPosition = bottomAnchor
             }
             
-            withAnimation(.interpolatingSpring(stiffness: 300.0, damping: 30.0, initialVelocity: 10.0)) {
+            withAnimation(manager.defaultAnimation) {
                 dragOffset = 0
                 self.manager.isPresented = (closestPosition == topAnchor)
                 if !manager.isPresented {
@@ -310,18 +309,18 @@ extension PartialSheet {
         if let rect: CGRect = notification.userInfo![endFrame] as? CGRect {
             let height = rect.height
             let bottomInset = UIApplication.shared.windows.first?.safeAreaInsets.bottom
-            withAnimation(.interpolatingSpring(stiffness: 300.0, damping: 30.0, initialVelocity: 10.0)) {
+//            withAnimation(manager.defaultAnimation) {
                 self.keyboardOffset = height - (bottomInset ?? 0)
-            }
+//            }
         }
     }
 
     /// Remove the keyboard offset
     private func keyboardHide(notification: Notification) {
         DispatchQueue.main.async {
-            withAnimation(.interpolatingSpring(stiffness: 300.0, damping: 30.0, initialVelocity: 10.0)) {
+//            withAnimation(manager.defaultAnimation) {
                 self.keyboardOffset = 0
-            }
+//            }
         }
     }
     
