@@ -65,7 +65,7 @@ struct PartialSheet: ViewModifier {
         if self.manager.isPresented {
             // 20.0 = To make sure we dont go under statusbar on screens without safe area inset
             let topInset = UIApplication.shared.windows.first?.safeAreaInsets.top ?? 20.0
-            let position = self.topAnchor + self.dragOffset - self.keyboardOffset
+            let position = self.topAnchor + self.dragOffset //- self.keyboardOffset
             
             if position < topInset {
                 return topInset
@@ -223,6 +223,7 @@ extension PartialSheet {
                 .clipShape(RoundedRectangle(cornerRadius: style.cornerRadius, style: .continuous))
                 .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.13), radius: 10.0)
                 .offset(y: self.sheetPosition + handlerSectionHeight)
+                .animation(Animation.spring(response: 0.6, dampingFraction: 0.8, blendDuration: 1.0).delay(0.1))
                 .gesture(drag)
             }
         }
