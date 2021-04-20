@@ -32,6 +32,8 @@ struct PartialSheet: ViewModifier {
     
     /// The offset for the drag gesture
     @State private var dragOffset: CGFloat = 0
+    
+    @State private var sheetOffset: CGFloat = 0
 
     /// The point for the top anchor
     private var topAnchor: CGFloat {
@@ -116,6 +118,8 @@ struct PartialSheet: ViewModifier {
                                                  object: nil,
                                                  queue: .main,
                                                  using: self.keyboardHide)
+                            self.sheetOffset = sheetPosition
+                            print("sheet offset: ", self.sheetOffset)
                     }
                     .onDisappear {
                         let notifier = NotificationCenter.default
@@ -193,6 +197,7 @@ extension PartialSheet {
                 .edgesIgnoringSafeArea(.vertical)
                 .onTapGesture {
                     withAnimation(manager.defaultAnimation) {
+                        self.sheetOffset = 0
                         self.manager.isPresented = false
                         self.dismissKeyboard()
                         self.manager.onDismiss?()
@@ -217,6 +222,7 @@ extension PartialSheet {
                     DispatchQueue.main.async {
                         withAnimation(manager.defaultAnimation) {
                             self.sheetContentRect = prefData.first?.bounds ?? .zero
+                            self.sheetOffset = self.sheetPosition
                         }
                     }
                 })
@@ -224,8 +230,7 @@ extension PartialSheet {
                 .background(self.background)
                 .clipShape(RoundedRectangle(cornerRadius: style.cornerRadius, style: .continuous))
                 .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.13), radius: 10.0)
-                .offset(y: self.sheetPosition + handlerSectionHeight)
-                .animation(manager.defaultAnimation)
+                .offset(y: sheetOffset)
                 .gesture(drag)
             }
         }
@@ -249,6 +254,7 @@ extension PartialSheet {
         let stiffness = CGFloat(0.3)
         if yOffset > threshold {
             dragOffset = drag.translation.height
+            self.sheetOffset = sheetPosition
         } else if
             // if above threshold and belove ScreenHeight make it elastic
             -yOffset + self.sheetContentRect.height <
@@ -257,6 +263,7 @@ extension PartialSheet {
             let distance = yOffset - threshold
             let translationHeight = threshold + (distance * stiffness)
             dragOffset = translationHeight
+            self.sheetOffset = sheetPosition
         }
     }
     
@@ -270,6 +277,7 @@ extension PartialSheet {
             DispatchQueue.main.async {
                 withAnimation(manager.defaultAnimation) {
                     dragOffset = 0
+                    self.sheetOffset = sheetPosition
                     self.manager.isPresented = false
                     self.manager.onDismiss?()
                 }
@@ -277,6 +285,7 @@ extension PartialSheet {
         } else if verticalDirection < 0 {
             withAnimation(manager.defaultAnimation) {
                 dragOffset = 0
+                self.sheetOffset = sheetPosition
                 self.manager.isPresented = true
             }
         } else {
@@ -294,6 +303,7 @@ extension PartialSheet {
             
             withAnimation(manager.defaultAnimation) {
                 dragOffset = 0
+                self.sheetOffset = sheetPosition
                 self.manager.isPresented = (closestPosition == topAnchor)
                 if !manager.isPresented {
                     manager.onDismiss?()
@@ -312,18 +322,20 @@ extension PartialSheet {
         if let rect: CGRect = notification.userInfo![endFrame] as? CGRect {
             let height = rect.height
             let bottomInset = UIApplication.shared.windows.first?.safeAreaInsets.bottom
-//            withAnimation(manager.defaultAnimation) {
-                self.keyboardOffset = height - (bottomInset ?? 0)
-//            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                withAnimation(manager.defaultAnimation) {
+                    self.sheetOffset = self.sheetPosition
+                }
+            }
         }
     }
 
     /// Remove the keyboard offset
     private func keyboardHide(notification: Notification) {
-        DispatchQueue.main.async {
-//            withAnimation(manager.defaultAnimation) {
-                self.keyboardOffset = 0
-//            }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            withAnimation(manager.defaultAnimation) {
+                self.sheetOffset = self.sheetPosition
+            }
         }
     }
     
