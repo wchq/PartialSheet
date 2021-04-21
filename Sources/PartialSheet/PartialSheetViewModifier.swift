@@ -206,7 +206,7 @@ extension PartialSheet {
             }
             // The SHEET VIEW
             Group {
-                VStack (spacing: 0) {
+                VStack {
                     HStack {
                         Spacer()
                         
@@ -216,7 +216,6 @@ extension PartialSheet {
                         
                         Spacer()
                     }
-                    .offset(y: -8)
                     
                     VStack(spacing: 0) {
                         VStack {
