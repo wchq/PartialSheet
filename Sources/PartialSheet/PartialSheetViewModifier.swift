@@ -237,13 +237,15 @@ extension PartialSheet {
                         }
                     }
                 })
-                .frame(width: UIScreen.main.bounds.width)
+                
                 .background(self.background)
-//                .clipShape(RoundedRectangle(cornerRadius: style.cornerRadius, style: .continuous))
-                .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.13), radius: 10.0)
-                .offset(y: sheetOffset)
-                .gesture(drag)
+                .clipShape(RoundedRectangle(cornerRadius: style.cornerRadius, style: .continuous))
+                
             }
+            .frame(width: UIScreen.main.bounds.width)
+            .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.13), radius: 10.0)
+            .offset(y: sheetOffset)
+            .gesture(drag)
         }
     }
 }
