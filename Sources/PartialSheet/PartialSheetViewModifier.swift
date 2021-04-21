@@ -206,46 +206,46 @@ extension PartialSheet {
             }
             // The SHEET VIEW
             Group {
-                HStack {
-                    Spacer()
-                    
-                    Capsule()
-                        .frame(width: 36, height: 5)
-                        .foregroundColor(style.handlerBarColor)
-                    
-                    Spacer()
-                }
-                .offset(y: -(8 + 5))
-                .background(Color.orange)
-
-                VStack(spacing: 0) {
-                    VStack {
-                        // Attach the SHEET CONTENT
-                        self.manager.content
-                            .background(
-                                GeometryReader { proxy in
-                                    Color.clear.preference(key: SheetPreferenceKey.self, value: [PreferenceData(bounds: proxy.frame(in: .global))])
-                                }
-                        )
+                VStack (spacing: 0) {
+                    HStack {
+                        Spacer()
+                        
+                        Capsule()
+                            .frame(width: 36, height: 5)
+                            .foregroundColor(style.handlerBarColor)
+                        
+                        Spacer()
                     }
-                    Spacer()
+                    .offset(y: -8)
+                    
+                    VStack(spacing: 0) {
+                        VStack {
+                            // Attach the SHEET CONTENT
+                            self.manager.content
+                                .background(
+                                    GeometryReader { proxy in
+                                        Color.clear.preference(key: SheetPreferenceKey.self, value: [PreferenceData(bounds: proxy.frame(in: .global))])
+                                    }
+                            )
+                        }
+                        Spacer()
+                    }
+                    .background(self.background)
+                    .clipShape(RoundedRectangle(cornerRadius: style.cornerRadius, style: .continuous))
                 }
-                .background(self.background)
-                .clipShape(RoundedRectangle(cornerRadius: style.cornerRadius, style: .continuous))
-                
+                .onPreferenceChange(SheetPreferenceKey.self, perform: { (prefData) in
+                    DispatchQueue.main.async {
+                        withAnimation(manager.defaultAnimation) {
+                            self.sheetContentRect = prefData.first?.bounds ?? .zero
+                            self.sheetOffset = self.sheetPosition
+                        }
+                    }
+                })
+                .frame(width: UIScreen.main.bounds.width)
+                .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.13), radius: 10.0)
+                .offset(y: sheetOffset)
+                .gesture(drag)
             }
-            .onPreferenceChange(SheetPreferenceKey.self, perform: { (prefData) in
-                DispatchQueue.main.async {
-                    withAnimation(manager.defaultAnimation) {
-                        self.sheetContentRect = prefData.first?.bounds ?? .zero
-                        self.sheetOffset = self.sheetPosition
-                    }
-                }
-            })
-            .frame(width: UIScreen.main.bounds.width)
-            .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.13), radius: 10.0)
-            .offset(y: sheetOffset)
-            .gesture(drag)
         }
     }
 }
