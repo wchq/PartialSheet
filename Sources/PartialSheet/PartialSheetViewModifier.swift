@@ -41,9 +41,10 @@ struct PartialSheet: ViewModifier {
         
         let calculatedTop =
             presenterContentRect.height +
-            bottomSafeArea -
+//            bottomSafeArea -
             sheetContentRect.height -
-            handlerSectionHeight - 40
+            handlerSectionHeight
+//            - 40
           
         guard calculatedTop < style.minTopDistance else {
             return calculatedTop
