@@ -216,6 +216,7 @@ extension PartialSheet {
                     Spacer()
                 }
                 .offset(y: -(8 + 5))
+                .background(Color.orange)
 
                 VStack(spacing: 0) {
                     VStack {
