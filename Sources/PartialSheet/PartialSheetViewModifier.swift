@@ -229,19 +229,18 @@ extension PartialSheet {
                     }
                     Spacer()
                 }
-                .onPreferenceChange(SheetPreferenceKey.self, perform: { (prefData) in
-                    DispatchQueue.main.async {
-                        withAnimation(manager.defaultAnimation) {
-                            self.sheetContentRect = prefData.first?.bounds ?? .zero
-                            self.sheetOffset = self.sheetPosition
-                        }
-                    }
-                })
-                
                 .background(self.background)
                 .clipShape(RoundedRectangle(cornerRadius: style.cornerRadius, style: .continuous))
                 
             }
+            .onPreferenceChange(SheetPreferenceKey.self, perform: { (prefData) in
+                DispatchQueue.main.async {
+                    withAnimation(manager.defaultAnimation) {
+                        self.sheetContentRect = prefData.first?.bounds ?? .zero
+                        self.sheetOffset = self.sheetPosition
+                    }
+                }
+            })
             .frame(width: UIScreen.main.bounds.width)
             .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.13), radius: 10.0)
             .offset(y: sheetOffset)
