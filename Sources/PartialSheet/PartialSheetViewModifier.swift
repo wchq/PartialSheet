@@ -206,6 +206,17 @@ extension PartialSheet {
             }
             // The SHEET VIEW
             Group {
+                HStack {
+                    Spacer()
+                    
+                    Capsule()
+                        .frame(width: 36, height: 5)
+                        .foregroundColor(style.handlerBarColor)
+                    
+                    Spacer()
+                }
+                .offset(y: -(8 + 5))
+
                 VStack(spacing: 0) {
                     VStack {
                         // Attach the SHEET CONTENT
