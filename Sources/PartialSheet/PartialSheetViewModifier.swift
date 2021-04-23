@@ -97,28 +97,28 @@ struct PartialSheet: ViewModifier {
                 // if the device type is an iPhone
                 .iPhone {
                     $0
-                        .background(
-                            GeometryReader { proxy in
-                                // Add a tracking on the presenter frame
-                                Color.clear.preference(
-                                    key: PresenterPreferenceKey.self,
-                                    value: [PreferenceData(bounds: proxy.frame(in: .global))]
-                                )
-                            }
+                    .background(
+                        GeometryReader { proxy in
+                            // Add a tracking on the presenter frame
+                            Color.clear.preference(
+                                key: PresenterPreferenceKey.self,
+                                value: [PreferenceData(bounds: proxy.frame(in: .global))]
+                            )
+                        }
                     )
-                        .onAppear{
-                            let notifier = NotificationCenter.default
-                            let willShow = UIResponder.keyboardWillShowNotification
-                            let willHide = UIResponder.keyboardWillHideNotification
-                            notifier.addObserver(forName: willShow,
-                                                 object: nil,
-                                                 queue: .main,
-                                                 using: self.keyboardShow)
-                            notifier.addObserver(forName: willHide,
-                                                 object: nil,
-                                                 queue: .main,
-                                                 using: self.keyboardHide)
-                            self.sheetOffset = sheetPosition
+                    .onAppear{
+                        let notifier = NotificationCenter.default
+                        let willShow = UIResponder.keyboardWillShowNotification
+                        let willHide = UIResponder.keyboardWillHideNotification
+                        notifier.addObserver(forName: willShow,
+                                             object: nil,
+                                             queue: .main,
+                                             using: self.keyboardShow)
+                        notifier.addObserver(forName: willHide,
+                                             object: nil,
+                                             queue: .main,
+                                             using: self.keyboardHide)
+                        self.sheetOffset = sheetPosition
                     }
                     .onDisappear {
                         let notifier = NotificationCenter.default
@@ -221,8 +221,7 @@ extension PartialSheet {
                                 .background(
                                     GeometryReader { proxy in
                                         Color.clear.preference(key: SheetPreferenceKey.self, value: [PreferenceData(bounds: proxy.frame(in: .global))])
-                                    }
-                            )
+                                })
                         }
                         Spacer()
                     }
@@ -239,7 +238,7 @@ extension PartialSheet {
                 })
                 .frame(width: UIScreen.main.bounds.width)
                 .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.13), radius: 10.0)
-                .offset(y: sheetOffset)
+                .offset(y: manager.willPresent ? sheetOffset : sheetPosition)
                 .gesture(drag)
             }
         }
@@ -282,15 +281,15 @@ extension PartialSheet {
         let verticalDirection = drag.predictedEndLocation.y - drag.location.y
         
         // Set the correct anchor point based on the vertical direction of the drag
-        if verticalDirection > 1 {
+        if verticalDirection > 1 { // going down
             DispatchQueue.main.async {
-                withAnimation(manager.defaultShowAnimation) {
+                withAnimation(manager.defaultHideAnimation) {
                     dragOffset = 0
                     self.sheetOffset = sheetPosition
                 }
                 self.manager.closePartialSheet()
             }
-        } else if verticalDirection < 0 {
+        } else if verticalDirection < 0 { // going up
             withAnimation(manager.defaultShowAnimation) {
                 dragOffset = 0
                 self.sheetOffset = sheetPosition
@@ -327,7 +326,7 @@ extension PartialSheet {
         let endFrame = UIResponder.keyboardFrameEndUserInfoKey
         if let _: CGRect = notification.userInfo![endFrame] as? CGRect {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                withAnimation(manager.defaultShowAnimation) {
+                withAnimation(manager.defaultKeyboardAnimation) {
                     self.sheetOffset = self.sheetPosition
                 }
             }
@@ -337,7 +336,7 @@ extension PartialSheet {
     /// Remove the keyboard offset
     private func keyboardHide(notification: Notification) {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            withAnimation(manager.defaultShowAnimation) {
+            withAnimation(manager.defaultKeyboardAnimation) {
                 self.sheetOffset = self.sheetPosition
             }
         }
