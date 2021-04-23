@@ -24,23 +24,19 @@ import SwiftUI
 public class PartialSheetManager: ObservableObject {
 
     /// Published var to present or hide the partial sheet
-    @Published var isPresented: Bool = false {
-        didSet {
-            if !isPresented {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { [weak self] in
-                    self?.content = AnyView(EmptyView())
-                    self?.onDismiss = nil
-                }
-            }
-        }
-    }
+    @Published var willPresent: Bool = false
+    @Published var isPresented: Bool = false
+    
     /// The content of the sheet
     @Published private(set) var content: AnyView
     /// the onDismiss code runned when the partial sheet is closed
     private(set) var onDismiss: (() -> Void)?
     
     /// Possibility to customize the slide in/out animation of the partial sheet
-    public var defaultAnimation: Animation = Animation.spring(response: 0.4, dampingFraction: 0.7, blendDuration: 1.0)
+    //public var defaultAnimation: Animation = Animation.spring(response: 0.4, dampingFraction: 0.7, blendDuration: 1.0)
+    public var animationCooldown = 0.5
+    public var defaultShowAnimation: Animation = Animation.spring(response: 0.275, dampingFraction: 0.6, blendDuration: 1.0)
+    public var defaultHideAnimation: Animation = Animation.linear(duration: 0.1)
 
     public init() {
         self.content = AnyView(EmptyView())
@@ -52,24 +48,30 @@ public class PartialSheetManager: ObservableObject {
      - parameter onDismiss: This code will be runned when the sheet is dismissed.
      */
     public func showPartialSheet<T>(_ onDismiss: (() -> Void)? = nil, @ViewBuilder content: @escaping () -> T) where T: View {
-        guard !isPresented else {
-            withAnimation(defaultAnimation) {
-                updatePartialSheet(
-                    content: {
-                        // do not animate the content, just the partial sheet
-                        withAnimation(nil) {
-                            content()
-                        }
-                    },
-                    onDismiss: onDismiss)
-            }
+//        guard !isPresented else {
+//            withAnimation(defaultAnimation) {
+//                updatePartialSheet(
+//                    content: {
+//                        // do not animate the content, just the partial sheet
+//                        withAnimation(nil) {
+//                            content()
+//                        }
+//                    },
+//                    onDismiss: onDismiss)
+//            }
+//            return
+//        }
+        if self.isPresented {
             return
         }
         
         self.content = AnyView(content())
         self.onDismiss = onDismiss
         DispatchQueue.main.async {
-            withAnimation(self.defaultAnimation) {
+            withAnimation(self.defaultShowAnimation) {
+                self.willPresent = true
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + self.animationCooldown) {
                 self.isPresented = true
             }
         }
@@ -82,23 +84,32 @@ public class PartialSheetManager: ObservableObject {
     - parameter onDismiss: This code will be runned when the sheet is dismissed.
     */
     public func updatePartialSheet<T>(isPresented: Bool? = nil, content: (() -> T)? = nil, onDismiss: (() -> Void)? = nil) where T: View {
-        if let content = content {
-            self.content = AnyView(content())
-        }
-        if let onDismiss = onDismiss {
-            self.onDismiss = onDismiss
-        }
-        if let isPresented = isPresented {
-            withAnimation(defaultAnimation) {
-                self.isPresented = isPresented
-            }
-        }
+//        if let content = content {
+//            self.content = AnyView(content())
+//        }
+//        if let onDismiss = onDismiss {
+//            self.onDismiss = onDismiss
+//        }
+//        if let isPresented = isPresented {
+//            withAnimation(defaultAnimation) {
+//                self.isPresented = isPresented
+//            }
+//        }
     }
 
     /// Close the Partial Sheet and run the onDismiss function if it has been previously specified
     public func closePartialSheet() {
-        withAnimation(.linear(duration: 0.25)) {
+        guard self.isPresented else {
+            return
+        }
+        
+        withAnimation(self.defaultHideAnimation) {
+            self.willPresent = false
+            self.content = AnyView(EmptyView())
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + self.animationCooldown) {
             self.isPresented = false
+            self.onDismiss = nil
         }
         self.onDismiss?()
     }

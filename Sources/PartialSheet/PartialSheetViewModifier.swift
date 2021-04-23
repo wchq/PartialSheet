@@ -64,7 +64,7 @@ struct PartialSheet: ViewModifier {
     
     /// Calculates the sheets y position
     private var sheetPosition: CGFloat {
-        if self.manager.isPresented {
+        if self.manager.willPresent {
             // 20.0 = To make sure we dont go under statusbar on screens without safe area inset
             let topInset = UIApplication.shared.windows.first?.safeAreaInsets.top ?? 20.0
             let position = self.topAnchor + self.dragOffset //- self.keyboardOffset
@@ -126,6 +126,7 @@ struct PartialSheet: ViewModifier {
                         notifier.removeObserver(self)
                     }
                     .onPreferenceChange(PresenterPreferenceKey.self, perform: { (prefData) in
+                        print("ASDFASDFASDF")
                         self.presenterContentRect = prefData.first?.bounds ?? .zero
                     })
             }
@@ -184,7 +185,7 @@ extension PartialSheet {
 
             //MARK: - iPhone Cover View
 
-            if manager.isPresented {
+            if manager.willPresent {
                 Group {
                     if style.enableCover {
                         Rectangle()
@@ -196,11 +197,9 @@ extension PartialSheet {
                 }
                 .edgesIgnoringSafeArea(.vertical)
                 .onTapGesture {
-                    withAnimation(manager.defaultAnimation) {
-                        self.sheetOffset = 0
-                        self.manager.isPresented = false
+                    DispatchQueue.main.async {
                         self.dismissKeyboard()
-                        self.manager.onDismiss?()
+                        self.manager.closePartialSheet()
                     }
                 }
             }
@@ -234,7 +233,7 @@ extension PartialSheet {
                 }
                 .onPreferenceChange(SheetPreferenceKey.self, perform: { (prefData) in
                     DispatchQueue.main.async {
-                        withAnimation(manager.defaultAnimation) {
+                        withAnimation(manager.defaultShowAnimation) {
                             self.sheetContentRect = prefData.first?.bounds ?? .zero
                             self.sheetOffset = self.sheetPosition
                         }
@@ -287,18 +286,16 @@ extension PartialSheet {
         // Set the correct anchor point based on the vertical direction of the drag
         if verticalDirection > 1 {
             DispatchQueue.main.async {
-                withAnimation(manager.defaultAnimation) {
+                withAnimation(manager.defaultShowAnimation) {
                     dragOffset = 0
                     self.sheetOffset = sheetPosition
-                    self.manager.isPresented = false
-                    self.manager.onDismiss?()
                 }
+                self.manager.closePartialSheet()
             }
         } else if verticalDirection < 0 {
-            withAnimation(manager.defaultAnimation) {
+            withAnimation(manager.defaultShowAnimation) {
                 dragOffset = 0
                 self.sheetOffset = sheetPosition
-                self.manager.isPresented = true
             }
         } else {
             /// The current sheet position
@@ -313,13 +310,12 @@ extension PartialSheet {
                 closestPosition = bottomAnchor
             }
             
-            withAnimation(manager.defaultAnimation) {
+            withAnimation(manager.defaultShowAnimation) {
                 dragOffset = 0
                 self.sheetOffset = sheetPosition
-                self.manager.isPresented = (closestPosition == topAnchor)
-                if !manager.isPresented {
-                    manager.onDismiss?()
-                }
+            }
+            if closestPosition != topAnchor {
+                self.manager.closePartialSheet()
             }
         }
     }
@@ -331,11 +327,9 @@ extension PartialSheet {
     /// Add the keyboard offset
     private func keyboardShow(notification: Notification) {
         let endFrame = UIResponder.keyboardFrameEndUserInfoKey
-        if let rect: CGRect = notification.userInfo![endFrame] as? CGRect {
-            let height = rect.height
-            let bottomInset = UIApplication.shared.windows.first?.safeAreaInsets.bottom
+        if let _: CGRect = notification.userInfo![endFrame] as? CGRect {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                withAnimation(manager.defaultAnimation) {
+                withAnimation(manager.defaultShowAnimation) {
                     self.sheetOffset = self.sheetPosition
                 }
             }
@@ -345,7 +339,7 @@ extension PartialSheet {
     /// Remove the keyboard offset
     private func keyboardHide(notification: Notification) {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            withAnimation(manager.defaultAnimation) {
+            withAnimation(manager.defaultShowAnimation) {
                 self.sheetOffset = self.sheetPosition
             }
         }
@@ -385,7 +379,7 @@ extension PartialSheet {
     }
 
 }
-
+/*
 struct PartialSheetAddView<Base: View, InnerContent: View>: View {
     @EnvironmentObject var partialSheetManager: PartialSheetManager
     
@@ -424,3 +418,4 @@ public extension View {
         PartialSheetAddView(isPresented: isPresented, content: content, base: self)
     }
 }
+*/
