@@ -119,14 +119,12 @@ struct PartialSheet: ViewModifier {
                                                  queue: .main,
                                                  using: self.keyboardHide)
                             self.sheetOffset = sheetPosition
-                            print("sheet offset: ", self.sheetOffset)
                     }
                     .onDisappear {
                         let notifier = NotificationCenter.default
                         notifier.removeObserver(self)
                     }
                     .onPreferenceChange(PresenterPreferenceKey.self, perform: { (prefData) in
-                        print("ASDFASDFASDF")
                         self.presenterContentRect = prefData.first?.bounds ?? .zero
                     })
             }
