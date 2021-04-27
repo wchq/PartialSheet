@@ -34,11 +34,16 @@ public class PartialSheetManager: ObservableObject {
     
     /// Possibility to customize the slide in/out animation of the partial sheet
     public var animationCooldown = 0.4
-    //public var defaultShowAnimation: Animation = Animation.spring(response: 0.275, dampingFraction: 0.6, blendDuration: 1.0)
-    public var defaultShowAnimation: Animation = Animation.timingCurve(0.075, 0.82, 0.165, 1.0)
+    
+    //spring animations
+    public var defaultShowAnimation: Animation = Animation.spring(response: 0.4, dampingFraction: 0.7, blendDuration: 1.0)
+    public var defaultKeyboardAnimation: Animation = Animation.spring(response: 0.4, dampingFraction: 0.7, blendDuration: 1.0)
+    
     public var defaultHideAnimation: Animation = Animation.linear(duration: 0.1)
-    //public var defaultKeyboardAnimation: Animation = Animation.spring(response: 0.4, dampingFraction: 0.7, blendDuration: 1.0)
-    public var defaultKeyboardAnimation: Animation = Animation.timingCurve(0.075, 0.82, 0.165, 1.0)
+    
+    //timing curve animations
+    //public var defaultShowAnimation: Animation = Animation.timingCurve(0.075, 0.82, 0.165, 1.0)
+    //public var defaultKeyboardAnimation: Animation = Animation.timingCurve(0.075, 0.82, 0.165, 1.0)
 
     public init() {
         self.content = AnyView(EmptyView())
