@@ -59,14 +59,14 @@ struct PartialSheet: ViewModifier {
     
     /// The height of the handler bar section
     private var handlerSectionHeight: CGFloat {
-        return 30
+        return 0 //30
     }
     
     /// Calculates the sheets y position
     private var sheetPosition: CGFloat {
         if self.manager.willPresent {
             // 20.0 = To make sure we dont go under statusbar on screens without safe area inset
-            let topInset = UIApplication.shared.windows.first?.safeAreaInsets.top ?? 20.0
+            let topInset = CGFloat(0) //UIApplication.shared.windows.first?.safeAreaInsets.top ?? 20.0
             let position = self.topAnchor + self.dragOffset //- self.keyboardOffset
             
             if position < topInset {
@@ -204,6 +204,7 @@ extension PartialSheet {
             // The SHEET VIEW
             Group {
                 VStack {
+                    /*
                     HStack {
                         Spacer()
                         
@@ -213,6 +214,7 @@ extension PartialSheet {
                         
                         Spacer()
                     }
+                    */
                     
                     VStack(spacing: 0) {
                         VStack {
@@ -239,7 +241,7 @@ extension PartialSheet {
                 .frame(width: UIScreen.main.bounds.width)
                 .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.13), radius: 10.0)
                 .offset(y: manager.willPresent ? sheetOffset : sheetPosition)
-                .gesture(drag)
+                //.gesture(drag)
             }
         }
     }
