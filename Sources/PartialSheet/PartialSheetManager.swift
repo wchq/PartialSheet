@@ -34,9 +34,11 @@ public class PartialSheetManager: ObservableObject {
     
     /// Possibility to customize the slide in/out animation of the partial sheet
     public var animationCooldown = 0.4
-    public var defaultShowAnimation: Animation = Animation.spring(response: 0.275, dampingFraction: 0.6, blendDuration: 1.0)
+    //public var defaultShowAnimation: Animation = Animation.spring(response: 0.275, dampingFraction: 0.6, blendDuration: 1.0)
+    public var defaultShowAnimation: Animation = Animation.timingCurve(0.075, 0.82, 0.165, 1.0)
     public var defaultHideAnimation: Animation = Animation.linear(duration: 0.1)
-    public var defaultKeyboardAnimation: Animation = Animation.spring(response: 0.4, dampingFraction: 0.7, blendDuration: 1.0)
+    //public var defaultKeyboardAnimation: Animation = Animation.spring(response: 0.4, dampingFraction: 0.7, blendDuration: 1.0)
+    public var defaultKeyboardAnimation: Animation = Animation.timingCurve(0.075, 0.82, 0.165, 1.0)
 
     public init() {
         self.content = AnyView(EmptyView())
@@ -84,17 +86,19 @@ public class PartialSheetManager: ObservableObject {
     - parameter onDismiss: This code will be runned when the sheet is dismissed.
     */
     public func updatePartialSheet<T>(isPresented: Bool? = nil, content: (() -> T)? = nil, onDismiss: (() -> Void)? = nil) where T: View {
-//        if let content = content {
-//            self.content = AnyView(content())
-//        }
-//        if let onDismiss = onDismiss {
-//            self.onDismiss = onDismiss
-//        }
-//        if let isPresented = isPresented {
-//            withAnimation(defaultAnimation) {
-//                self.isPresented = isPresented
-//            }
-//        }
+        if let content = content {
+            self.content = AnyView(content())
+        }
+        if let onDismiss = onDismiss {
+            self.onDismiss = onDismiss
+        }
+        /*
+        if let isPresented = isPresented {
+            withAnimation(defaultAnimation) {
+                self.isPresented = isPresented
+            }
+        }
+        */
     }
 
     /// Close the Partial Sheet and run the onDismiss function if it has been previously specified
