@@ -37,7 +37,7 @@ struct PartialSheet: ViewModifier {
 
     /// The point for the top anchor
     private var topAnchor: CGFloat {
-        let bottomSafeArea = (UIApplication.shared.windows.first?.safeAreaInsets.bottom ?? 0)
+        let bottomSafeArea = (UIApplication.shared.windows.first?.safeAreaInsets.bottom ?? 20)
         
         let calculatedTop =
             presenterContentRect.height +
