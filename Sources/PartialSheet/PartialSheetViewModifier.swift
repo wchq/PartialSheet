@@ -66,7 +66,7 @@ struct PartialSheet: ViewModifier {
     private var sheetPosition: CGFloat {
         if self.manager.willPresent {
             // 20.0 = To make sure we dont go under statusbar on screens without safe area inset
-            let topInset = CGFloat(0) //UIApplication.shared.windows.first?.safeAreaInsets.top ?? 20.0
+            let topInset = UIApplication.shared.windows.first?.safeAreaInsets.top ?? 20.0
             let position = self.topAnchor + self.dragOffset //- self.keyboardOffset
             
             if position < topInset {
