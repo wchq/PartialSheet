@@ -67,7 +67,7 @@ struct PartialSheet: ViewModifier {
         if self.manager.willPresent {
             // 20.0 = To make sure we dont go under statusbar on screens without safe area inset
             let topInset = UIApplication.shared.windows.first?.safeAreaInsets.top ?? 20.0
-            let position = self.topAnchor + self.dragOffset //- self.keyboardOffset
+            let position = self.topAnchor + self.dragOffset - self.keyboardOffset
             
             if position < topInset {
                 return topInset
@@ -127,7 +127,7 @@ struct PartialSheet: ViewModifier {
                     .onPreferenceChange(PresenterPreferenceKey.self, perform: { (prefData) in
                         self.presenterContentRect = prefData.first?.bounds ?? .zero
                     })
-            }
+                }
                 // if the device type is not an iPhone,
                 // display the sheet content as a normal sheet
                 .iPadOrMac {
@@ -137,14 +137,15 @@ struct PartialSheet: ViewModifier {
                         }, content: {
                             self.iPadAndMacSheet()
                         })
-            }
-            // if the device type is an iPhone,
-            // display the sheet content as a draggableSheet
-            if deviceType == .iphone {
-                iPhoneSheet()
-                    .edgesIgnoringSafeArea(.vertical)
-            }
+                }
+                // if the device type is an iPhone,
+                // display the sheet content as a draggableSheet
+                if deviceType == .iphone {
+                    iPhoneSheet()
+                        .edgesIgnoringSafeArea(.vertical)
+                }
         }
+        .ignoresSafeArea(.keyboard)
     }
 }
 
@@ -326,8 +327,9 @@ extension PartialSheet {
     /// Add the keyboard offset
     private func keyboardShow(notification: Notification) {
         let endFrame = UIResponder.keyboardFrameEndUserInfoKey
-        if let _: CGRect = notification.userInfo![endFrame] as? CGRect {
+        if let rect: CGRect = notification.userInfo![endFrame] as? CGRect {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                self.keyboardOffset = rect.height
                 withAnimation(manager.defaultKeyboardAnimation) {
                     self.sheetOffset = self.sheetPosition
                 }
@@ -338,6 +340,7 @@ extension PartialSheet {
     /// Remove the keyboard offset
     private func keyboardHide(notification: Notification) {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            self.keyboardOffset = 0
             withAnimation(manager.defaultKeyboardAnimation) {
                 self.sheetOffset = self.sheetPosition
             }
